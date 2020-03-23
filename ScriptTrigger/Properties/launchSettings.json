@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "ScriptTrigger": {
+      "commandName": "Project"
+    }
+  }
+}

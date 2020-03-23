@@ -1,0 +1,9 @@
+﻿<Application x:Class="ScriptTrigger.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:main="clr-namespace:ScriptTrigger.View.Main"
+             StartupUri="View/Main/MainWindow.xaml">
+    <Application.Resources>
+        <main:MainViewModel x:Key="MainViewModel" />
+    </Application.Resources>
+</Application>
