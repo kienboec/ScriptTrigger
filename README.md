@@ -1,4 +1,3 @@
-# Script Trigger
 This project is intended to automate developer's testing effort by automation. 
         
 Feel free to contribute. 
