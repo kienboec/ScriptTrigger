@@ -5,6 +5,15 @@ Feel free to contribute.
 ## State of work
 This project is still "work in progress".
 
+## Installation
+1) 	You need .net core 3.1 installed on your machine \
+	see: https://dotnet.microsoft.com/download/dotnet-core/3.1
+2) 	download the latest version from the releases section \
+	see: https://github.com/kienboec/ScriptTrigger/releases
+3)	unzip and run
+4)	read the docs \
+	see: https://kienboec.github.io/ScriptTrigger/
+
 ## Command line
 ```
 -v=[VALUE      ] sets the value (string)
