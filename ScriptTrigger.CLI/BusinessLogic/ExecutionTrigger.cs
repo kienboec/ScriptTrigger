@@ -92,7 +92,7 @@ namespace ScriptTrigger.CLI.BusinessLogic
         public string SourceTypeDisplayName
         {
             get => ExecutionTriggers.FirstOrDefault(x => x.Item1 == SourceType)?.Item2;
-            set => SourceType = ExecutionTriggers.FirstOrDefault(x => x.Item2.ToString() == value)?.Item1 ?? ExecutionTriggerSourceTypeEnum.None;
+            set => SourceType = ExecutionTriggers.FirstOrDefault(x => x.Item2 == value)?.Item1 ?? ExecutionTriggerSourceTypeEnum.None;
         }
 
         private bool _isListening;

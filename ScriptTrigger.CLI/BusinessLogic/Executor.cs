@@ -32,7 +32,7 @@ namespace ScriptTrigger.CLI.BusinessLogic
 
         #region Property
 
-        private ExecutionActionTypeEnum _type;
+        private ExecutionActionTypeEnum _type = ExecutionActionTypeEnum.None;
         public ExecutionActionTypeEnum Type
         {
             get => Get(_type);
@@ -56,19 +56,13 @@ namespace ScriptTrigger.CLI.BusinessLogic
 
         private void SetExecutionAction(ExecutionActionTypeEnum type)
         {
-            switch (type)
+            _executionAction = type switch
             {
-                case ExecutionActionTypeEnum.Script:
-                    _executionAction = new ExecutionActionScript();
-                    break;
-                case ExecutionActionTypeEnum.Command:
-                    _executionAction = new ExecutionActionCommand();
-                    break;
-                default:
-                case ExecutionActionTypeEnum.None:
-                    _executionAction = new ExecutionActionNone();
-                    break;
-            }
+                ExecutionActionTypeEnum.Script => (IExecutionAction) new ExecutionActionScript(),
+                ExecutionActionTypeEnum.Command => new ExecutionActionCommand(),
+                ExecutionActionTypeEnum.None => new ExecutionActionNone(),
+                _ => new ExecutionActionNone()
+            };
         }
 
         public string ExecutionOutput => this._executionAction.ExecutionOutput;

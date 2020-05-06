@@ -75,7 +75,7 @@ namespace ScriptTrigger.View.Main
 
         public Tuple<ExecutionTriggerSourceTypeEnum, string> SelectedExecutionTrigger
         {
-            get => this.ExecutionTriggers.FirstOrDefault(x => x.Item1 == _scriptTrigger.ExecutionTrigger.SourceType);
+            get => ExecutionTriggers.FirstOrDefault(x => x.Item1 == _scriptTrigger.ExecutionTrigger.SourceType);
             set
             {
                 _scriptTrigger.ExecutionTrigger.SourceType = value?.Item1 ?? ExecutionTriggerSourceTypeEnum.OpenPort;
@@ -85,10 +85,10 @@ namespace ScriptTrigger.View.Main
 
         public Tuple<ExecutionActionTypeEnum, string> SelectedExecutionType
         {
-            get => this.ExecutionTypes.FirstOrDefault(x => x.Item1 == _scriptTrigger.Executor.Type);
+            get => ExecutionTypes.FirstOrDefault(x => x.Item1 == _scriptTrigger.Executor.Type);
             set
             {
-                _scriptTrigger.Executor.Type = value?.Item1 ?? ExecutionActionTypeEnum.Script;
+                _scriptTrigger.Executor.Type = value?.Item1 ?? ExecutionActionTypeEnum.None;
                 OnPropertyChanged(nameof(SelectedExecutionType));
             }
         }
@@ -110,8 +110,8 @@ namespace ScriptTrigger.View.Main
                 : new SolidColorBrush(Colors.Beige);
 
         public string ExecutionOutput => this._scriptTrigger.Executor.ExecutionOutput;
-        public List<Tuple<ExecutionTriggerSourceTypeEnum, string>> ExecutionTriggers => ExecutionTrigger.ExecutionTriggers;
-        public List<Tuple<ExecutionActionTypeEnum, string>> ExecutionTypes => Executor.ExecutionTypes;
+        public static List<Tuple<ExecutionTriggerSourceTypeEnum, string>> ExecutionTriggers => ExecutionTrigger.ExecutionTriggers;
+        public static List<Tuple<ExecutionActionTypeEnum, string>> ExecutionTypes => Executor.ExecutionTypes;
 
         public string IsListeningText => this._scriptTrigger.ExecutionTrigger.IsListening ? "On" : "Off";
         public Visibility IsListeningVisible => this._scriptTrigger.ExecutionTrigger.IsListening ? Visibility.Visible : Visibility.Collapsed;

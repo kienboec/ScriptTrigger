@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -10,7 +11,14 @@ namespace ScriptTrigger.Tests.OpenSocket
     {
         static void Main(string[] args)
         {
-            HttpListenerBasedListener();
+            if(args.Any(x => x?.Equals("-socket") ?? false))
+            {
+                SocketBasedListener();
+            }
+            else
+            {
+                HttpListenerBasedListener();
+            }
         }
 
         private static void HttpListenerBasedListener()

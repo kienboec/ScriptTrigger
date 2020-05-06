@@ -35,7 +35,9 @@ namespace ScriptTrigger.CLI
             };
 
             Console.WriteLine(scriptTrigger.GetStateMessage());
+            #pragma warning disable CA1303 // Literale nicht als lokalisierte Parameter übergeben
             Console.WriteLine("--------------------------------------------------");
+            #pragma warning restore CA1303 // Literale nicht als lokalisierte Parameter übergeben
 
             scriptTrigger.ExecutionTrigger.Wait();
         }

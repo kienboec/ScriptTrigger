@@ -81,11 +81,11 @@ namespace ScriptTrigger.CLI.BusinessLogic.ExecutionAction
                 if (this.ExitCode != null)
                 {
                     output.AppendLine();
-                    output.AppendLine("exit code : " + this.ExitCode.ToString());
+                    output.AppendLine($"exit code : {this.ExitCode}");
 
                     if (this.StarTime.HasValue)
                     {
-                        output.AppendLine("start time: " + this.StarTime.Value.ToString("u"));
+                        output.AppendLine("start time: " + this.StarTime.Value.ToString("u", Internationalization.DefaultCulture));
                     }
 
                     output.AppendLine($"elapsed ms: {this.ElapsedMs}");

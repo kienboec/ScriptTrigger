@@ -9,15 +9,17 @@ namespace ScriptTrigger.CLI.BusinessLogic.ExecutionAction
     {
         protected override void ExecuteInternal(string action)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo(action);
-            
-            startInfo.CreateNoWindow = true;
-            startInfo.RedirectStandardError = true;
-            startInfo.RedirectStandardOutput = true;
-            startInfo.RedirectStandardInput = true;
-            startInfo.StandardErrorEncoding = Encoding.UTF8;
-            startInfo.StandardOutputEncoding = Encoding.UTF8;
-            startInfo.StandardInputEncoding = Encoding.UTF8;
+            ProcessStartInfo startInfo = new ProcessStartInfo(action)
+            {
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                RedirectStandardInput = true,
+                StandardErrorEncoding = Encoding.UTF8,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardInputEncoding = Encoding.UTF8
+            };
+
 
             StarTime = DateTime.Now;
             Stopwatch stopwatch = new Stopwatch();
