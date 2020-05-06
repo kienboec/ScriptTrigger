@@ -4,7 +4,7 @@ namespace ScriptTrigger.CLI.BusinessLogic
 {
     public class CommandLineArgumentInterpreter
     {
-        public bool ShouldDrawHelp { get; } = false;
+        public bool ShouldOnlyDrawHelp { get; } = false;
         public bool HasInvalidParameters { get; } = false;
         public string Value { get; } = null;
         public string Trigger { get; } = null;
@@ -12,17 +12,20 @@ namespace ScriptTrigger.CLI.BusinessLogic
         public string Action { get; } = null;
         public bool ShouldListen { get; } = false;
 
-        public CommandLineArgumentInterpreter()
+        public CommandLineArgumentInterpreter() : this(Environment.GetCommandLineArgs())
+        {
+        }
+        public CommandLineArgumentInterpreter(string[] args)
         {
             try
             {
-                foreach (string arg in Environment.GetCommandLineArgs())
+                foreach (string arg in args ?? (Array.Empty<string>()))
                 {
                     if (arg.StartsWith("-h", StringComparison.InvariantCulture) ||
                         arg.StartsWith("/?", StringComparison.InvariantCulture) ||
                         arg.StartsWith("--help", StringComparison.InvariantCulture))
                     {
-                        ShouldDrawHelp = true;
+                        ShouldOnlyDrawHelp = true;
                     }
                     else if (arg.StartsWith("-v=", StringComparison.InvariantCulture) ||
                         arg.StartsWith("-v:", StringComparison.InvariantCulture))
@@ -70,7 +73,7 @@ namespace ScriptTrigger.CLI.BusinessLogic
                     }
                     else
                     {
-                        ShouldDrawHelp = true;
+                        ShouldOnlyDrawHelp = true;
                         HasInvalidParameters = true;
                     }
                 }

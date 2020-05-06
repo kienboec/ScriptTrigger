@@ -6,9 +6,11 @@ namespace ScriptTrigger.CLI.BusinessLogic.ExecutionTriggerSource
 {
     public class ExecutionTriggerFiredEventArgs : EventArgs
     {
-        public ExecutionTriggerFiredEventArgs()
+        public bool Triggered { get; set; }
+
+        public ExecutionTriggerFiredEventArgs(bool triggered)
         {
-            
+            Triggered = triggered;
         }
     }
 }

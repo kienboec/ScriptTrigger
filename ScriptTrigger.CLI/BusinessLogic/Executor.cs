@@ -6,20 +6,13 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using ScriptTrigger.CLI.BusinessLogic.ExecutionAction;
+using ScriptTrigger.CLI.BusinessLogic.Infrastructure;
 
 namespace ScriptTrigger.CLI.BusinessLogic
 {
-    public class Executor : INotifyPropertyChanged
+    public class Executor : NotifyPropertyChangedBase
     {
-        private ExecutionActionTypeEnum _type;
-        private string _action;
-        private string _output;
-        private string _error;
-        private int? _exitCode = null;
-        private long _elapsedMs;
-        private DateTime? _starTime = null;
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        #region static 
 
         public static List<Tuple<ExecutionActionTypeEnum, string>> ExecutionTypes { get; }
             = new List<Tuple<ExecutionActionTypeEnum, string>>()
@@ -28,201 +21,62 @@ namespace ScriptTrigger.CLI.BusinessLogic
                 new Tuple<ExecutionActionTypeEnum, string>(ExecutionActionTypeEnum.Command, "command"),
             };
 
+        #endregion
+
+        #region Fields / Events
+
+        private IExecutionAction _executionAction;
+        public event EventHandler<EventArgs> Executed;
+
+        #endregion
+
+        #region Property
+
+        private ExecutionActionTypeEnum _type;
         public ExecutionActionTypeEnum Type
         {
-            get => _type;
-            set
-            {
-                _type = value;
-                OnPropertyChanged(nameof(Type));
-            }
+            get => Get(_type);
+            set => Set(ref _type, value, SetExecutionAction, nameof(Type), nameof(TypeDisplayName));
         }
 
         public string TypeDisplayName
         {
-            get { return ExecutionTypes.FirstOrDefault(x => x.Item1 == Type)?.Item2; }
-            set
-            {
-                if (Enum.TryParse(value ?? "None", out ExecutionActionTypeEnum type))
-                {
-                    this.Type = type;
-                }
-                else
-                {
-                    this.Type = ExecutionActionTypeEnum.None;
-                }
-            }
+            get => ExecutionTypes.FirstOrDefault(x => x.Item1 == Type)?.Item2;
+            set => Type = EnumParse(value, true, ExecutionActionTypeEnum.None);
         }
 
+        private string _action;
         public string Action
         {
-            get => _action;
-            set
-            {
-                _action = value ?? string.Empty;
-                OnPropertyChanged(nameof(Action));
-            }
+            get => Get(_action);
+            set => Set(ref _action, value, nameof(Action));
         }
 
-        public string Output
+        #endregion
+
+        private void SetExecutionAction(ExecutionActionTypeEnum type)
         {
-            get => _output;
-            set
+            switch (type)
             {
-                _output = value;
-                OnPropertyChanged(nameof(Output));
-                OnPropertyChanged(nameof(ExecutionOutput));
+                case ExecutionActionTypeEnum.Script:
+                    _executionAction = new ExecutionActionScript();
+                    break;
+                case ExecutionActionTypeEnum.Command:
+                    _executionAction = new ExecutionActionCommand();
+                    break;
+                default:
+                case ExecutionActionTypeEnum.None:
+                    _executionAction = new ExecutionActionNone();
+                    break;
             }
         }
 
-        public string Error
-        {
-            get => _error;
-            set
-            {
-                _error = value;
-                OnPropertyChanged(nameof(Error));
-                OnPropertyChanged(nameof(ExecutionOutput));
-            }
-
-        }
-
-        public int? ExitCode
-        {
-            get => _exitCode;
-            set
-            {
-                _exitCode = value;
-                OnPropertyChanged(nameof(ExitCode));
-                OnPropertyChanged(nameof(ExecutionOutput));
-            }
-        }
-
-        public long ElapsedMs
-        {
-            get => _elapsedMs;
-            set
-            {
-                _elapsedMs = value;
-                OnPropertyChanged(nameof(ElapsedMs));
-                OnPropertyChanged(nameof(ExecutionOutput));
-            }
-        }
-
-        public DateTime? StarTime
-        {
-            get => _starTime;
-            set
-            {
-                _starTime = value;
-                OnPropertyChanged(nameof(StarTime));
-                OnPropertyChanged(nameof(ExecutionOutput));
-            }
-        }
-
-        public string ExecutionOutput
-        {
-            get
-            {
-                StringBuilder output = new StringBuilder();
-                if (!string.IsNullOrWhiteSpace(this.Output))
-                {
-                    output.AppendLine(Output);
-                }
-
-                if (!string.IsNullOrWhiteSpace(this.Output))
-                {
-                    if (output.Length > 0)
-                    {
-                        output.AppendLine();
-                        output.AppendLine("-------------------");
-                    }
-
-                    output.AppendLine("Error: ");
-                    output.AppendLine(Error);
-                }
-
-                if (this.ExitCode != null)
-                {
-                    output.AppendLine();
-                    output.AppendLine("exit code : " + this.ExitCode.ToString());
-
-                    if (this.StarTime.HasValue)
-                    {
-                        output.AppendLine("start time: " + this.StarTime.Value.ToString("u"));
-                    }
-
-                    output.AppendLine("elapsed ms: " + this.ElapsedMs.ToString());
-                }
-
-                return output.ToString();
-            }
-        }
-
-        public event EventHandler<EventArgs> Executed;
+        public string ExecutionOutput => this._executionAction.ExecutionOutput;
 
         public void Execute()
         {
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(this.Action))
-                {
-                    if (Type == ExecutionActionTypeEnum.None)
-                    {
-                        // ignore
-                    } else if (Type == ExecutionActionTypeEnum.Script)
-                    {
-                        ExecuteCommand(this.Action);
-                    }
-                    else if (Type == ExecutionActionTypeEnum.Command)
-                    {
-                        ExecuteCommand("cmd", "/c", this.Action);
-                    }
-                }
-            }
-            catch (Exception exc)
-            {
-                this.Error = exc.Message;
-            }
-            finally
-            {
-                Executed?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
-        private void ExecuteCommand(string filename, params string[] args)
-        {
-
-            ProcessStartInfo startInfo = new ProcessStartInfo(filename);
-            foreach (string arg in args)
-            {
-                startInfo.ArgumentList.Add(arg);
-            }
-
-            startInfo.CreateNoWindow = true;
-            startInfo.RedirectStandardError = true;
-            startInfo.RedirectStandardOutput = true;
-            startInfo.RedirectStandardInput = true;
-            startInfo.StandardErrorEncoding = Encoding.UTF8;
-            startInfo.StandardOutputEncoding = Encoding.UTF8;
-            startInfo.StandardInputEncoding = Encoding.UTF8;
-
-            StarTime = DateTime.Now;
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-            Process process = Process.Start(startInfo);
-            this.Output = process?.StandardOutput?.ReadToEnd();
-            this.Error = process?.StandardError?.ReadToEnd();
-            this.ExitCode = process?.ExitCode ?? null;
-            stopwatch.Stop();
-            this.ElapsedMs = stopwatch.ElapsedMilliseconds;
-
-        }
-
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            _executionAction.Execute(Action);
+            Executed?.Invoke(this, EventArgs.Empty);
         }
     }
 }

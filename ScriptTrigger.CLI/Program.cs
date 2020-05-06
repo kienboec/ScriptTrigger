@@ -8,44 +8,34 @@ namespace ScriptTrigger.CLI
     {
         static void Main(string[] args)
         {
-            ScriptTriggerImplementation scriptTrigger = new ScriptTriggerImplementation();
-            
-            scriptTrigger.ExecutionTrigger.PropertyChanged += (sender, args) => {
-                if (args.PropertyName == nameof(ExecutionTrigger.LastCycleFired))
-                {
-                    string stateString = "unknown";
-                    ConsoleColor stateColor = ConsoleColor.DarkGray;
-                    if (scriptTrigger.ExecutionTrigger.LastCycleFired.HasValue)
-                    {
-                        stateString = scriptTrigger.ExecutionTrigger.LastCycleFired.Value
-                            ? "fire"
-                            : "idle";
-                        stateColor = scriptTrigger.ExecutionTrigger.LastCycleFired.Value
-                            ? ConsoleColor.Green
-                            : ConsoleColor.DarkRed;
-                    }
+            using ScriptTriggerImplementation scriptTrigger = new ScriptTriggerImplementation(args);
+            if (scriptTrigger.ShouldOnlyDrawHelp)
+            {
+                Console.WriteLine(ScriptTriggerImplementation.GetHelpMessage());
+                return;
+            }
 
-                    Console.Write("state change: ");
-                    var fg = Console.ForegroundColor;
-                    Console.ForegroundColor = stateColor;
-                    Console.Write($"{stateString,10}");
-                    Console.ForegroundColor = fg;
-                    Console.WriteLine($" ({DateTime.Now.ToShortTimeString()})");
-                }
+            scriptTrigger.ExecutionTrigger.FireChanged += (sender, args) =>
+            {
+                var stateString = args.Triggered ? "fire" : "idle";
+                var stateColor = args.Triggered ? ConsoleColor.Green : ConsoleColor.DarkRed;
+
+                Console.Write("state change: ");
+                var fg = Console.ForegroundColor;
+                Console.ForegroundColor = stateColor;
+                Console.Write($"{stateString,10}");
+                Console.ForegroundColor = fg;
+                Console.WriteLine($" ({DateTime.Now.ToShortTimeString()})");
             };
 
             scriptTrigger.Executor.Executed += (sender, eventArgs) =>
             {
-                Console.WriteLine("execution ended"); 
+                Console.WriteLine("<execution ended>");
 
             };
 
-            if (scriptTrigger.ShouldDrawHelp)
-            {
-                Console.WriteLine(scriptTrigger.GetHelpMessage());
-                Console.WriteLine("--------------------------------------------------");
-                return;
-            }
+            Console.WriteLine(scriptTrigger.GetStateMessage());
+            Console.WriteLine("--------------------------------------------------");
 
             scriptTrigger.ExecutionTrigger.Wait();
         }

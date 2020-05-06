@@ -12,14 +12,14 @@ using ScriptTrigger.View.Infrastructure;
 
 namespace ScriptTrigger.View.Main
 {
-    public class MainViewModel : INotifyPropertyChanged
+    public class MainViewModel : INotifyPropertyChanged, IDisposable
     {
-        private readonly ScriptTriggerImplementation _scriptTrigger;
-        public event PropertyChangedEventHandler PropertyChanged;
+        private ScriptTriggerImplementation _scriptTrigger;
 
         public RelayCommand ToggleListeningCommand { get; }
         public RelayCommand ExecuteCommand { get; }
         public RelayCommand ExitCommand { get; }
+
         public MainViewModel()
         {
             _scriptTrigger = new ScriptTriggerImplementation();
@@ -117,9 +117,25 @@ namespace ScriptTrigger.View.Main
         public Visibility IsListeningVisible => this._scriptTrigger.ExecutionTrigger.IsListening ? Visibility.Visible : Visibility.Collapsed;
 
 
+        public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _scriptTrigger?.Dispose();
+                _scriptTrigger = null;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

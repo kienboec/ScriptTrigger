@@ -7,11 +7,14 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
+using ScriptTrigger.CLI.BusinessLogic.Infrastructure;
 
 namespace ScriptTrigger.CLI.BusinessLogic
 {
-    public class ExecutionTrigger : INotifyPropertyChanged
+    public class ExecutionTrigger : NotifyPropertyChangedBase
     {
+        #region static
+
         public static List<Tuple<ExecutionTriggerSourceTypeEnum, string>> ExecutionTriggers { get; }
             = new List<Tuple<ExecutionTriggerSourceTypeEnum, string>>()
         {
@@ -20,72 +23,11 @@ namespace ScriptTrigger.CLI.BusinessLogic
             new Tuple<ExecutionTriggerSourceTypeEnum, string>(ExecutionTriggerSourceTypeEnum.DataChanges, "data changes"),
         };
 
-        private bool _isListeningBackingField;
-        private Task _listeningTask;
-        private CancellationTokenSource _listeningTaskCancellationTokenSource;
-        private TimeSpan _delay;
-        private bool? _lastCycleFired;
-        private string _value;
-        private IExecutionTriggerSource _executionTriggerSource = null;
-        private ExecutionTriggerSourceTypeEnum _sourceType;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        public event EventHandler<ExecutionTriggerFiredEventArgs> Fire;
-
-        public TimeSpan Delay
-        {
-            get => _delay; set
-            {
-                _delay = value;
-                OnPropertyChanged(nameof(Delay));
-            }
-        }
-
-        public bool? LastCycleFired
-        {
-            get => _lastCycleFired;
-            set
-            {
-                _lastCycleFired = value;
-                OnPropertyChanged(nameof(LastCycleFired));
-            }
-        }
-
-        public string Value
-        {
-            get => _value;
-            set
-            {
-                _value = value;
-                OnPropertyChanged(nameof(Value));
-            }
-        }
-
-        public ExecutionTriggerSourceTypeEnum SourceType
-        {
-            get => _sourceType;
-            set
-            {
-                _sourceType = value;
-
-                switch (_sourceType)
-                {
-                    case ExecutionTriggerSourceTypeEnum.OpenPort:
-                        _executionTriggerSource = new ExecutionTriggerSourceOpenPort();
-                        break;
-
-                }
-
-                OnPropertyChanged(nameof(SourceType));
-            }
-        }
-
-        public string SourceTypeDisplayName
-            => ExecutionTriggers.FirstOrDefault(x => x.Item1 == SourceType)?.Item2;
+        #endregion
 
         public ExecutionTrigger()
         {
-            this._isListeningBackingField = false;
+            this._isListening = false;
             this._listeningTask = null;
             this._listeningTaskCancellationTokenSource = null;
             this._delay = TimeSpan.FromSeconds(2);
@@ -95,32 +37,101 @@ namespace ScriptTrigger.CLI.BusinessLogic
             this._value = null;
         }
 
+        #region Fields / Events
+        
+        private Task _listeningTask;
+        private CancellationTokenSource _listeningTaskCancellationTokenSource;
+        private IExecutionTriggerSource _executionTriggerSource = null;
+
+        public event EventHandler<ExecutionTriggerFiredEventArgs> Fire;
+        public event EventHandler<ExecutionTriggerFiredEventArgs> FireChanged;
+
+        #endregion
+
+        #region Properties 
+
+        private TimeSpan _delay;
+        public TimeSpan Delay
+        {
+            get => Get(_delay);
+            set => Set(ref _delay, value, nameof(Delay));
+        }
+
+        private bool? _lastCycleFired;
+        public bool? LastCycleFired
+        {
+            get => Get(_lastCycleFired);
+            set => Set(ref _lastCycleFired, value, nameof(LastCycleFired));
+        }
+
+        private string _value;
+        public string Value
+        {
+            get => Get(_value);
+            set => Set(ref _value, value, nameof(Value));
+        }
+
+        private ExecutionTriggerSourceTypeEnum _sourceType;
+        public ExecutionTriggerSourceTypeEnum SourceType
+        {
+            get => Get(_sourceType);
+            set => Set(ref _sourceType, 
+                value, 
+                SetExecutionTriggerSource, 
+                nameof(SourceType), 
+                nameof(SourceTypeAsString), 
+                nameof(SourceTypeDisplayName));
+        }
+
+        public string SourceTypeAsString
+        {
+            get => Get(_sourceType).ToString();
+            set => SourceType = EnumParse<ExecutionTriggerSourceTypeEnum>(value, true, ExecutionTriggerSourceTypeEnum.None);
+        }
+
+        public string SourceTypeDisplayName
+        {
+            get => ExecutionTriggers.FirstOrDefault(x => x.Item1 == SourceType)?.Item2;
+            set => SourceType = ExecutionTriggers.FirstOrDefault(x => x.Item2.ToString() == value)?.Item1 ?? ExecutionTriggerSourceTypeEnum.None;
+        }
+
+        private bool _isListening;
         public bool IsListening
         {
-            get => _isListeningBackingField;
-            set
+            get => Get(_isListening);
+            set => Set(ref _isListening, value, MaintainListeningTask, nameof(IsListening));
+        }
+
+        #endregion
+
+        private void SetExecutionTriggerSource(ExecutionTriggerSourceTypeEnum sourceType)
+        {
+            switch (sourceType)
             {
-                _isListeningBackingField = value;
-                if (_isListeningBackingField && this._listeningTask == null)
-                {
-                    this._listeningTaskCancellationTokenSource = new CancellationTokenSource();
-                    this._listeningTaskCancellationTokenSource.Token.ThrowIfCancellationRequested();
-                    this._listeningTask = this.CreateListeningTask();
-                }
-                else if (!this._isListeningBackingField && this._listeningTask != null)
-                {
-                    this._listeningTaskCancellationTokenSource.Cancel();
-                    this._listeningTask.Wait();
-                    this._listeningTask = null;
-                    this._listeningTaskCancellationTokenSource = null;
-                }
+                case ExecutionTriggerSourceTypeEnum.OpenPort:
+                    _executionTriggerSource = new ExecutionTriggerSourceOpenPort();
+                    break;
+                case ExecutionTriggerSourceTypeEnum.None:
+                    _executionTriggerSource = new ExecutionTriggerSourceNone();
+                    break;
             }
         }
-        public static ExecutionTriggerSourceTypeEnum GetTypeByTypeNameOrNone(string type = "None")
+
+        private void MaintainListeningTask(bool isListening)
         {
-            return
-                ExecutionTriggers.FirstOrDefault(x => x.Item1.ToString() == type)?.Item1
-                ?? ExecutionTriggerSourceTypeEnum.None;
+            if (isListening && this._listeningTask == null)
+            {
+                this._listeningTaskCancellationTokenSource = new CancellationTokenSource();
+                this._listeningTaskCancellationTokenSource.Token.ThrowIfCancellationRequested();
+                this._listeningTask = this.CreateListeningTask();
+            }
+            else if (!isListening && this._listeningTask != null)
+            {
+                this._listeningTaskCancellationTokenSource.Cancel();
+                this._listeningTask.Wait();
+                this._listeningTask = null;
+                this._listeningTaskCancellationTokenSource = null;
+            }
         }
 
         public void Wait(bool setListening = true)
@@ -156,8 +167,9 @@ namespace ScriptTrigger.CLI.BusinessLogic
                             this.LastCycleFired = cycleShouldFire;
                             if (cycleShouldFire)
                             {
-                                Fire?.Invoke(this, new ExecutionTriggerFiredEventArgs());
+                                Fire?.Invoke(this, new ExecutionTriggerFiredEventArgs(true));
                             }
+                            FireChanged?.Invoke(this, new ExecutionTriggerFiredEventArgs(cycleShouldFire));
                         }
 
                         await Task.Delay(this.Delay, this._listeningTaskCancellationTokenSource.Token)
@@ -166,7 +178,7 @@ namespace ScriptTrigger.CLI.BusinessLogic
                 }
                 catch (OperationCanceledException)
                 {
-
+                    // ignore
                 }
                 catch (Exception)
                 {
@@ -175,9 +187,11 @@ namespace ScriptTrigger.CLI.BusinessLogic
             }, this._listeningTaskCancellationTokenSource.Token);
         }
 
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected override void Dispose(bool disposing)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            base.Dispose(disposing);
+            _listeningTask.Dispose();
+            _listeningTaskCancellationTokenSource.Dispose();
         }
     }
 }
