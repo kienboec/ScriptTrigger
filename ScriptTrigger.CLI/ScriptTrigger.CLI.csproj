@@ -1,23 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UseWPF>true</UseWPF>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
     <Authors>Daniel Kienböck</Authors>
-    <Company />
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://kienboec.github.io/ScriptTrigger/</PackageProjectUrl>
     <PackageIcon>icon512x512.png</PackageIcon>
     <PackageIconUrl />
     <RepositoryUrl>https://github.com/kienboec/ScriptTrigger</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>script trigger</PackageTags>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
     <Copyright>Daniel Kienböck</Copyright>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -25,12 +20,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="View\Main\icon512x512.png" />
     <None Include="..\LICENSE">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-    <None Include="View\Main\icon512x512.png">
+    <None Include="..\ScriptTrigger\View\Main\icon512x512.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
@@ -41,14 +35,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\ScriptTrigger.CLI\ScriptTrigger.CLI.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="View\Main\icon512x512.png" />
   </ItemGroup>
 
 </Project>

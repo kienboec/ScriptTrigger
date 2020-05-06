@@ -1,15 +1,16 @@
 ﻿using System.Net.Sockets;
 
-namespace ScriptTrigger.BusinessLogic.ExecutionTriggerSource
+namespace ScriptTrigger.CLI.BusinessLogic.ExecutionTriggerSource
 {
-    public static class ExecutionTriggerSourceOpenPort
+    public class ExecutionTriggerSourceOpenPort : IExecutionTriggerSource
     {
-        public static bool CheckTrigger(string parameter)
+        public bool CheckTrigger(string parameter)
         {
             using TcpClient tcpClient = new TcpClient();
             try
             {
                 tcpClient.Connect("127.0.0.1", int.Parse(parameter));
+                tcpClient.Close();
                 return true;
             }
             catch
@@ -17,6 +18,5 @@ namespace ScriptTrigger.BusinessLogic.ExecutionTriggerSource
                 return false;
             }
         }
-
     }
 }

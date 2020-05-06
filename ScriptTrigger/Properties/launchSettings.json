@@ -1,7 +1,8 @@
 {
   "profiles": {
     "ScriptTrigger": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "-t:OpenPort -v:5000 \"-c:curl http://localhost:5000\" -l:True"
     }
   }
 }

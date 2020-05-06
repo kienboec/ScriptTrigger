@@ -4,12 +4,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Script Trigger" Height="178" Width="625"
-        DataContext="{StaticResource MainViewModel}" ResizeMode="NoResize" Icon="icon512x512.png">
-    <Grid Margin="5">
-
+        Title="Script Trigger" Height="300" Width="400"
+        MinHeight="300" MinWidth="400"
+        DataContext="{StaticResource MainViewModel}" 
+        ResizeMode="CanResize" Icon="icon512x512.png">
+    
+    <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="40"/>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="30"/>
             <RowDefinition Height="30"/>
             <RowDefinition Height="30"/>
@@ -20,22 +24,32 @@
             <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
 
-        <Label Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" FontWeight="Bold" FontFamily="Consolas" FontSize="14" FontStyle="Normal">execute scripts when you need them...</Label>
+        <DockPanel Visibility="Hidden">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="_File" >
+                    <MenuItem Header="_Exit" Command="{Binding ExitCommand}" />
+                </MenuItem>
+            </Menu>
+        </DockPanel>
 
-        <Label Grid.Column="0" Grid.Row="1">Trigger:</Label>
+
+        <Label Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" FontWeight="Bold" FontFamily="Consolas" FontSize="14" FontStyle="Normal">execute scripts when you need them...</Label>
+
+        <Label Grid.Column="0" Grid.Row="2">Trigger:</Label>
         <ComboBox Grid.Column="1" 
-                  Grid.Row="1" 
+                  Grid.Row="2" 
                   Margin="3" 
                   ItemsSource="{Binding ExecutionTriggers}" 
                   DisplayMemberPath="Item2"
                   
                   SelectedValue="{Binding Path=SelectedExecutionTrigger, Mode=TwoWay}" />
 
-        <Label Grid.Column="0" Grid.Row="2">Value:</Label>
-        <Grid  Grid.Column="1" Grid.Row="2" >
+        <Label Grid.Column="0" Grid.Row="3">Value:</Label>
+        <Grid  Grid.Column="1" Grid.Row="3" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="60"/>
             </Grid.ColumnDefinitions>
             <TextBox Grid.Column="0" Margin="3" Text="{Binding Value, Mode=TwoWay}" Background="{Binding LastFiredStateBackground}"></TextBox>
             <Button Grid.Column="1" Margin="3" Command="{Binding ToggleListeningCommand}">
@@ -45,10 +59,27 @@
                     <Ellipse Width="10" Height="10" Fill="Red" Visibility="{Binding IsListeningVisible}"></Ellipse>
                 </StackPanel>
             </Button>
+            <Button Grid.Column="2" Command="{Binding ExecuteCommand}" Margin="3"> Execute</Button>
         </Grid>
-        <Label Grid.Column="0" Grid.Row="3">Script:</Label>
-        <TextBox Grid.Column="1" Grid.Row="3" Margin="3" Text="{Binding Script, Mode=TwoWay}"></TextBox>
 
+        <Label Grid.Column="0" Grid.Row="4">Type:</Label>
+        <ComboBox Grid.Column="1" 
+                  Grid.Row="4" 
+                  Margin="3" 
+                  ItemsSource="{Binding ExecutionTypes}" 
+                  DisplayMemberPath="Item2"
+                  
+                  SelectedValue="{Binding Path=SelectedExecutionType, Mode=TwoWay}" />
 
+        <Label Grid.Column="0" Grid.Row="5">Action:</Label>
+        <TextBox Grid.Column="1" Grid.Row="5" Margin="3" Text="{Binding Action, Mode=TwoWay}"></TextBox>
+
+        <ScrollViewer Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="6" Margin="3" VerticalAlignment="Stretch" 
+                      HorizontalAlignment="Stretch" CanContentScroll="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <Label Content="{Binding ExecutionOutput}" Background="LightGray" FontFamily="Consolas" FontSize="8" 
+                   ToolTip="{Binding ExecutionOutput}"/>
+        </ScrollViewer>
+
+        
     </Grid>
 </Window>

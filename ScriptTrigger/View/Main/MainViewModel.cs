@@ -1,155 +1,121 @@
-﻿using System;
+﻿using ScriptTrigger.CLI.BusinessLogic;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Media;
-using ScriptTrigger.BusinessLogic;
+using ScriptTrigger.CLI.BusinessLogic.ExecutionAction;
+using ScriptTrigger.CLI.BusinessLogic.ExecutionTriggerSource;
+using ScriptTrigger.View.Infrastructure;
 
 namespace ScriptTrigger.View.Main
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private readonly ExecutionTrigger _trigger;
-        private readonly Executor _executor;
+        private readonly ScriptTriggerImplementation _scriptTrigger;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public RelayCommand ToggleListeningCommand { get; }
-        public List<Tuple<ExecutionTriggerSourceTypeEnum, string>> ExecutionTriggers { get; }
-
+        public RelayCommand ExecuteCommand { get; }
+        public RelayCommand ExitCommand { get; }
         public MainViewModel()
         {
-            _executor = new Executor();
-            _trigger = new ExecutionTrigger();
-            
-            _trigger.Fire += (sender, args) => this._executor.Execute();
-            _trigger.LastCycleFireChanged += (sender, args) =>
+            _scriptTrigger = new ScriptTriggerImplementation();
+            _scriptTrigger.PropertyChanged += (sender, args) =>
             {
-                OnPropertyChanged(nameof(LastCycleFired));
-                OnPropertyChanged(nameof(LastFiredStateBackground));
+                if (args.PropertyName == nameof(ExecutionTrigger.LastCycleFired))
+                {
+                    OnPropertyChanged(nameof(LastCycleFired));
+                    OnPropertyChanged(nameof(LastFiredStateBackground));
+                }
             };
 
-            ExecutionTriggers = new List<Tuple<ExecutionTriggerSourceTypeEnum, string>>()
+            _scriptTrigger.Executor.Executed += (sender, args) =>
             {
-                new Tuple<ExecutionTriggerSourceTypeEnum, string>(ExecutionTriggerSourceTypeEnum.OpenPort, "open port"),
+                OnPropertyChanged(nameof(ExecutionOutput));
             };
-            this.ToggleListeningCommand = new RelayCommand((parameter) => this.IsListening = !this.IsListening);
 
-            InterpretCommandLineArgs();
-        }
-
-        private void InterpretCommandLineArgs()
-        {
-            try
-            {
-                string valueArg = null;
-                string triggerArg = null;
-                string scriptArg = null;
-                bool shouldListenArg = false;
-
-                foreach (string arg in Environment.GetCommandLineArgs())
-                {
-                    if (arg.StartsWith("-v=", StringComparison.InvariantCulture) ||
-                        arg.StartsWith("-v:", StringComparison.InvariantCulture))
-                    {
-                        valueArg = arg.Substring(3);
-                    }
-                    else if (arg.StartsWith("-t=", StringComparison.InvariantCulture) ||
-                             arg.StartsWith("-t:", StringComparison.InvariantCulture))
-                    {
-                        triggerArg = arg.Substring(3);
-                    }
-                    else if (arg.StartsWith("-s=", StringComparison.InvariantCulture) ||
-                             arg.StartsWith("-s:", StringComparison.InvariantCulture))
-                    {
-                        scriptArg = arg.Substring(3);
-                    }
-                    else if (arg.StartsWith("-l=", StringComparison.InvariantCulture) ||
-                             arg.StartsWith("-l:", StringComparison.InvariantCulture))
-                    {
-                        if (!bool.TryParse(arg.Substring(3), out shouldListenArg))
-                        {
-                            shouldListenArg = false;
-                        }
-                    }
-                }
-
-                this.Value = valueArg ?? string.Empty;
-                this.SelectedExecutionTrigger =
-                    this.ExecutionTriggers.FirstOrDefault(x => x.Item1.ToString() == triggerArg) ??
-                    this.ExecutionTriggers.First();
-                this.Script = scriptArg ?? string.Empty;
-
-                if (shouldListenArg)
-                {
-                    this.IsListening = true;
-                }
-            }
-            catch
-            {
-                // ignored
-            }
+            this.ToggleListeningCommand = new RelayCommand((p) => this.IsListening = !this.IsListening);
+            this.ExecuteCommand = new RelayCommand(p => _scriptTrigger.Executor.Execute());
+            this.ExitCommand = new RelayCommand((p) => Application.Current.Shutdown(0));
         }
 
         public string Value
         {
-            get => _trigger.Parameter;
+            get => _scriptTrigger.ExecutionTrigger.Value;
             set
             {
-                _trigger.Parameter = value;
+                _scriptTrigger.ExecutionTrigger.Value = value;
                 OnPropertyChanged(nameof(Value));
             }
         }
 
-        public string Script
+        public string Action
         {
-            get => this._executor.Script;
+            get => this._scriptTrigger.Executor.Action;
             set
             {
-                this._executor.Script = value;
-                OnPropertyChanged(nameof(Script));
+                this._scriptTrigger.Executor.Action = value;
+                OnPropertyChanged(nameof(Action));
+            }
+        }
+
+        public bool? LastCycleFired
+        {
+            get => this._scriptTrigger.ExecutionTrigger.LastCycleFired;
+            set
+            {
+                this._scriptTrigger.ExecutionTrigger.LastCycleFired = value;
+                OnPropertyChanged(nameof(LastCycleFired));
+                OnPropertyChanged(nameof(LastFiredStateBackground));
             }
         }
 
         public Tuple<ExecutionTriggerSourceTypeEnum, string> SelectedExecutionTrigger
         {
-            get => this.ExecutionTriggers.FirstOrDefault(x => x.Item1 == _trigger.SourceType);
+            get => this.ExecutionTriggers.FirstOrDefault(x => x.Item1 == _scriptTrigger.ExecutionTrigger.SourceType);
             set
             {
-                _trigger.SourceType = value?.Item1 ?? ExecutionTriggerSourceTypeEnum.OpenPort;
+                _scriptTrigger.ExecutionTrigger.SourceType = value?.Item1 ?? ExecutionTriggerSourceTypeEnum.OpenPort;
                 OnPropertyChanged(nameof(SelectedExecutionTrigger));
             }
         }
 
-        private bool IsListening
+        public Tuple<ExecutionActionTypeEnum, string> SelectedExecutionType
         {
-            get => this._trigger.IsListening;
+            get => this.ExecutionTypes.FirstOrDefault(x => x.Item1 == _scriptTrigger.Executor.Type);
             set
             {
-                this._trigger.IsListening = value;
-                OnPropertyChanged(nameof(IsListening));
+                _scriptTrigger.Executor.Type = value?.Item1 ?? ExecutionActionTypeEnum.Script;
+                OnPropertyChanged(nameof(SelectedExecutionType));
+            }
+        }
+        public bool IsListening
+        {
+            get => this._scriptTrigger.ExecutionTrigger.IsListening;
+            set
+            {
+                this._scriptTrigger.ExecutionTrigger.IsListening = value;
+
                 OnPropertyChanged(nameof(IsListeningText));
                 OnPropertyChanged(nameof(IsListeningVisible));
             }
         }
-        public string IsListeningText => this._trigger.IsListening ? "On" : "Off";
-        public Visibility IsListeningVisible => this._trigger.IsListening ? Visibility.Visible : Visibility.Collapsed;
-
-        private bool? LastCycleFired
-        {
-            get => this._trigger.LastCycleFired;
-            set
-            {
-                this._trigger.LastCycleFired = value;
-                OnPropertyChanged(nameof(LastCycleFired));
-                OnPropertyChanged(nameof(LastFiredStateBackground));
-            }
-        }
 
         public SolidColorBrush LastFiredStateBackground =>
-            this.LastCycleFired.HasValue 
+            this.LastCycleFired.HasValue
                 ? (this.LastCycleFired.Value ? new SolidColorBrush(Colors.DarkSeaGreen) : new SolidColorBrush(Colors.Coral))
                 : new SolidColorBrush(Colors.Beige);
+
+        public string ExecutionOutput => this._scriptTrigger.Executor.ExecutionOutput;
+        public List<Tuple<ExecutionTriggerSourceTypeEnum, string>> ExecutionTriggers => ExecutionTrigger.ExecutionTriggers;
+        public List<Tuple<ExecutionActionTypeEnum, string>> ExecutionTypes => Executor.ExecutionTypes;
+
+        public string IsListeningText => this._scriptTrigger.ExecutionTrigger.IsListening ? "On" : "Off";
+        public Visibility IsListeningVisible => this._scriptTrigger.ExecutionTrigger.IsListening ? Visibility.Visible : Visibility.Collapsed;
+
 
         protected void OnPropertyChanged(string propertyName = null)
         {
