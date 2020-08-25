@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using ScriptTrigger.CLI.BusinessLogic.Infrastructure;
 
 namespace ScriptTrigger.CLI.BusinessLogic
@@ -9,13 +10,11 @@ namespace ScriptTrigger.CLI.BusinessLogic
         public ExecutionTrigger ExecutionTrigger { get; }
         public bool ShouldOnlyDrawHelp { get; }
 
-        public ScriptTriggerImplementation() : this(null)
+        public ScriptTriggerImplementation()
         {
-        }
-
-        public ScriptTriggerImplementation(string[] commandLineArgs)
-        {
-            var commandLineArgumentInterpreter = new CommandLineArgumentInterpreter(commandLineArgs);
+            var commandLineArgumentInterpreter = new CommandLineArgumentInterpreter(
+                Environment.GetCommandLineArgs().Skip(1)
+            );
             ExecutionTrigger = new ExecutionTrigger()
             {
                 Delay = TimeSpan.FromSeconds(3),
@@ -33,7 +32,7 @@ namespace ScriptTrigger.CLI.BusinessLogic
             
             this.ShouldOnlyDrawHelp = commandLineArgumentInterpreter.ShouldOnlyDrawHelp;
 
-            this.ExecutionTrigger.Fire += (sender, args) => Executor.Execute();
+            this.ExecutionTrigger.Fire += async (sender, args) => await Executor.Execute().ConfigureAwait(false);
             this.ExecutionTrigger.PropertyChanged += (sender, args) => DelegateRaisePropertyChanged(nameof(ExecutionTrigger));
             this.Executor.PropertyChanged += (sender, args) => DelegateRaisePropertyChanged(nameof(Executor));
         }

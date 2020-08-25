@@ -1,1 +1,0 @@
-c:\sw\pandoc\pandoc.exe --from markdown --to html --output=index.html -B header.html -A footer.html --metadata title="ScriptTrigger" ..\README.md

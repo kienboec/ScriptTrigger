@@ -64,14 +64,16 @@ namespace ScriptTrigger.CLI.BusinessLogic.Infrastructure
             field = newValue;
 
             executeBeforePropertyChanged?.Invoke(newValue);
-            OnPropertyChanged(propertyName);
-            foreach (var furtherPropertyName in furtherPropertyNames)
-            {
-                OnPropertyChanged(furtherPropertyName);
-            }
+            DelegateRaisePropertyChanged(propertyName, furtherPropertyNames);
             executeAfterPropertyChanged?.Invoke(newValue);
 
             return true;
+        }
+
+        protected T Propagate<T>(T newValue, string propertyName, params string[] furtherPropertyNames)
+        {
+            DelegateRaisePropertyChanged(propertyName, furtherPropertyNames);
+            return newValue;
         }
 
         protected static TEnum EnumParse<TEnum>(string value, bool ignoreCase, TEnum onErrorValue)
@@ -92,9 +94,13 @@ namespace ScriptTrigger.CLI.BusinessLogic.Infrastructure
             }
         }
 
-        protected void DelegateRaisePropertyChanged(string propertName)
+        protected void DelegateRaisePropertyChanged(string propertName, params string[] furtherPropertyNames)
         {
             OnPropertyChanged(propertName);
+            foreach (var furtherPropertyName in furtherPropertyNames)
+            {
+                OnPropertyChanged(furtherPropertyName);
+            }
         }
         
         private void OnPropertyChanged(string propertyName)

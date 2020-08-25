@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 using ScriptTrigger.CLI.BusinessLogic.ExecutionAction;
 using ScriptTrigger.CLI.BusinessLogic.Infrastructure;
 
@@ -65,12 +66,15 @@ namespace ScriptTrigger.CLI.BusinessLogic
             };
         }
 
-        public string ExecutionOutput => this._executionAction.ExecutionOutput;
+        public string ExecutionOutput => this._executionAction?.ExecutionOutput;
 
-        public void Execute()
+        public async Task Execute()
         {
-            _executionAction.Execute(Action);
-            Executed?.Invoke(this, EventArgs.Empty);
+            await Task.Run(() =>
+            {
+                _executionAction.Execute(Action);
+                Executed?.Invoke(this, EventArgs.Empty);
+            }).ConfigureAwait(false);
         }
     }
 }

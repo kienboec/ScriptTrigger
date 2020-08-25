@@ -1,57 +1,57 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>ScriptTrigger</title>
-  <style>
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<!doctype html>
 <html lang="en">
-  <head>
-    <title>ScriptTrigger</title>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  </head>
-  <body>
-    <div class="container">
-        
-<header id="title-block-header">
-<h1 class="title">ScriptTrigger</h1>
-</header>
-<p>This project is intended to automate developer’s testing effort by automation.</p>
-<p>Feel free to contribute.</p>
-<h2 id="state-of-work">State of work</h2>
-<p>This project is still “work in progress”.</p>
-<h2 id="command-line">Command line</h2>
-<pre><code>-v=[VALUE      ] sets the value (string)
--s=[SCRIPTNAME ] sets the script name (use absolute paths)
--t=[TRIGGERNAME] sets the trigger-value (see below)
--l=[True|False ] sets whether to listen on startup or not</code></pre>
-<p>TriggerValues: - OpenPort … checks if the application can connect to a port using tcp</p>
-</div>
-<!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-  </body>
-</html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScriptTrigger</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body>
+  <div class="container">
+    <header id="title-block-header">
+      <h1 class="title">ScriptTrigger</h1>
+    </header>
+    <p>This project is intended to automate developer’s testing experience by automation.</p>
+    <p>Feel free to contribute.</p>
+
+    <h2 id="state-of-work">State of work</h2>
+    <p>This project is still “work in progress”.</p>
+
+    <h2 id="command-line">Command line</h2>
+    <pre>
+      scriptTrigger [-h | -t=TN -v=V [-s=SN|-c=CMD] -l=LIS]
+
+      -h            : help (also /? and --help)
+
+      -t=TRIGGERNAME: sets the trigger-value (see below)
+      -v=VALUE      : sets the  value (string)
+      
+      -e=EXECTYPE   : execution type
+      -a=ACTION     : actions to execute with EXECTYPE
+      -s=SCRIPTNAME : sets the script name (use absolute paths); short for -e=SCRIPT -a=SCRIPTNAME
+      -c=COMMANDS   : sets the commands to execute; short for -e=COMMAND -a=COMMANDS
+
+      -l=True|False : sets whether to listen on startup or not
+
+      TriggerNames: 
+        OpenPort    : checks if the application can connect to a port using tcp
+      
+    </pre>
+
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
 </body>
+
 </html>

@@ -8,7 +8,7 @@ namespace ScriptTrigger.CLI
     {
         static void Main(string[] args)
         {
-            using ScriptTriggerImplementation scriptTrigger = new ScriptTriggerImplementation(args);
+            using ScriptTriggerImplementation scriptTrigger = new ScriptTriggerImplementation();
             if (scriptTrigger.ShouldOnlyDrawHelp)
             {
                 Console.WriteLine(ScriptTriggerImplementation.GetHelpMessage());

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -20,7 +21,7 @@ namespace ScriptTrigger.CLI.BusinessLogic
         {
             new Tuple<ExecutionTriggerSourceTypeEnum, string>(ExecutionTriggerSourceTypeEnum.None, "none"),
             new Tuple<ExecutionTriggerSourceTypeEnum, string>(ExecutionTriggerSourceTypeEnum.OpenPort, "open port"),
-            new Tuple<ExecutionTriggerSourceTypeEnum, string>(ExecutionTriggerSourceTypeEnum.DataChanges, "data changes"),
+            //new Tuple<ExecutionTriggerSourceTypeEnum, string>(ExecutionTriggerSourceTypeEnum.DataChanges, "data changes"),
         };
 
         #endregion
@@ -92,7 +93,7 @@ namespace ScriptTrigger.CLI.BusinessLogic
         public string SourceTypeDisplayName
         {
             get => ExecutionTriggers.FirstOrDefault(x => x.Item1 == SourceType)?.Item2;
-            set => SourceType = ExecutionTriggers.FirstOrDefault(x => x.Item2 == value)?.Item1 ?? ExecutionTriggerSourceTypeEnum.None;
+            set => SourceType = ExecutionTriggers.FirstOrDefault(x => x.Item2 == value.ToLower())?.Item1 ?? ExecutionTriggerSourceTypeEnum.None;
         }
 
         private bool _isListening;

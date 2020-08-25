@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ScriptTrigger.CLI.BusinessLogic
 {
@@ -15,7 +16,7 @@ namespace ScriptTrigger.CLI.BusinessLogic
         public CommandLineArgumentInterpreter() : this(Environment.GetCommandLineArgs())
         {
         }
-        public CommandLineArgumentInterpreter(string[] args)
+        public CommandLineArgumentInterpreter(IEnumerable<string> args)
         {
             try
             {
